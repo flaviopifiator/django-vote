@@ -99,37 +99,6 @@ class _VotableManager(models.Manager):
         return self.vote(user_id, action=DOWN)
 
     @instance_required
-    def delete(self, user_id):
-        try:
-            with transaction.atomic():
-                content_type = ContentType.objects.get_for_model(self.instance)
-
-                try:
-                    # select_for_update will add a write lock here
-                    vote = self.through.objects.select_for_update().get(
-                        user_id=user_id,
-                        content_type_id=content_type.id,
-                        object_id=self.instance.id
-                    )
-                except self.through.DoesNotExist:
-                    return False
-
-                self.instance = self.model.objects.select_for_update().get(
-                    pk=self.instance.pk)
-                statistics_field = self.through.ACTION_FIELD.get(vote.action)
-                setattr(self.instance, statistics_field,
-                        getattr(self.instance, statistics_field) - 1)
-
-                self.instance.save()
-
-                vote.delete()
-
-            return True
-        except (OperationalError, IntegrityError):
-            # concurrent request may decrease num_vote field to negative
-            return False
-
-    @instance_required
     def get(self, user_id):
         return self.through.objects.filter(
             user_id=user_id,
