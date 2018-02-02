@@ -144,13 +144,13 @@ class _VotableManager(models.Manager):
             action=action
         ).exists()
 
-    def all(self, user_id, action=UP):
+    def all(self, user_id):
         content_type = ContentType.objects.get_for_model(self.model)
 
         object_ids = self.through.objects.filter(
             user_id=user_id,
             content_type=content_type,
-            action=action).values_list('object_id', flat=True)
+        ).values_list('object_id', flat=True)
 
         return self.model.objects.filter(pk__in=list(object_ids))
 
