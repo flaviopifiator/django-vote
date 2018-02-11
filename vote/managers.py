@@ -126,7 +126,7 @@ class _VotableManager(models.Manager):
     def count(self):
         votos = dict()
         votos.update(
-            up=self.through.votes_for(self.model, self.instance, UP).count()
+            up=self.through.votes_for(self.model, self.instance, UP).count(),
             down=self.through.votes_for(self.model, self.instance, DOWN).count()
         )
         return votos
